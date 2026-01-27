@@ -193,11 +193,6 @@ export default function ScoreboardScreen({
     return prediction === winner ? 'correct' : 'incorrect';
   };
 
-  const getRoomName = (code: string) => {
-    const room = rooms.find(r => r.code === code);
-    return room?.name || '';
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0 }}

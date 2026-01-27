@@ -16,6 +16,10 @@ server/data/db/*.json
 # Uploaded guest photos
 server/data/guests/
 
+# Copyrighted images (nominee photos, backgrounds)
+server/data/nominees/
+server/data/backgrounds/
+
 # IDE
 .vscode/
 .idea/
@@ -31,3 +35,9 @@ npm-debug.log*
 # Temp files
 *.tmp
 .*.tmp
+
+# Personal deployment notes
+whcca.md
+package.server.json
+build-whc.bat
+whc/

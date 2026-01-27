@@ -1,6 +1,14 @@
 # Oscar Suite (React.js + Node.js)
 
-A web-based application for hosting Oscar prediction parties. Guests submit their predictions for Academy Award winners, and the app displays nominees, tracks scores, and shows a live leaderboard as winners are announced.
+A web-based application for hosting Oscar prediction parties. Guests submit their predictions for Academy Award winners, and the app displays nominees, tracks scores, and shows a live scoreboard as winners are announced.
+
+## Disclaimer
+
+This project is for **personal, non-commercial use only**. It is not affiliated with, endorsed by, or connected to the Academy of Motion Picture Arts and Sciences.
+
+- "Oscar," "Oscars," "Academy Awards," and the Oscar statuette design are trademarks and copyrighted property of the Academy of Motion Picture Arts and Sciences.
+- Nominee images and movie artwork are not included in this repository and must be sourced separately for personal use.
+- This software is provided as-is for private Oscar party entertainment purposes.
 
 ## Tech Stack
 
@@ -40,8 +48,8 @@ OscarSuiteReactJS/
 
 ### Prerequisites
 
-- Node.js 18+
-- npm or yarn
+- Node.js 18+ (20 LTS recommended)
+- npm
 
 ### Installation
 
@@ -56,6 +64,22 @@ OscarSuiteReactJS/
    cd client
    npm install
    ```
+
+3. **Set up images (not included in repo):**
+
+   Create the following directories and add your own images:
+   ```
+   server/data/nominees/      # Nominee photos (referenced in awards.json)
+   server/data/backgrounds/   # Background images:
+                              #   - bg-logo.png
+                              #   - bg-award.png
+                              #   - bg-scoreboard.png
+                              #   - oscar.png (default guest avatar)
+   ```
+
+4. **Update awards data:**
+
+   Edit `server/data/awards.json` to match your nominee images and current year's nominations.
 
 ### Development
 
@@ -75,9 +99,9 @@ OscarSuiteReactJS/
 
 ### URLs
 
-- **Guest Page:** http://localhost:3000/guest - Submit predictions
-- **Admin Page:** http://localhost:3000/admin - Control panel
-- **Display Page:** http://localhost:3000/display - Audience screen
+- `/guest` - Guest prediction page
+- `/admin` - Admin control panel
+- `/display` - Audience display screen (for TV/projector)
 
 ## API Endpoints
 
@@ -111,25 +135,30 @@ Messages are sent in format: `action+++param1+++param2`
 
 ## Features
 
-### Guest Page
-- Select your name from dropdown or create a new guest
+### Guest Page (`/guest`)
+- Select your name from dropdown
 - Upload a profile photo
 - Make predictions for each award category
 - Progress bar shows completion percentage
 - Submit button saves predictions
 
-### Admin Page
-- Display controls: Show Logo, Show Scoreboard, Show Award
-- Select winners for each category
-- Lock/unlock predictions
-- Manage rooms (create/delete)
-- View all guests with scores and predictions
-- Delete individual guests or clear all
+### Admin Page (`/admin`)
+- **Display controls:** Show Logo, Show Scoreboard, Show Award
+- **Guest management:** Create guests, edit room assignments, delete guests
+- **Winner selection:** Select winners for each category
+- **Settings:** Lock/unlock predictions
+- **Room management:** Create/delete rooms
+- **Guest table:** View all guests with scores and predictions for all categories
 
-### Display Page
-- **Logo Screen:** Animated Oscar logo with random category cycling
-- **Award Screen:** Nominees appear with 2-second stagger, predictor avatars show who picked each
-- **Scoreboard Screen:** Animated score counting, guest cards reorder by score, detailed prediction table slides up
+### Display Page (`/display`)
+- **Logo Screen:** Title with random category preview cycling every 40 seconds
+- **Award Screen:** Nominees appear with 2-second stagger, predictor avatars show who picked each nominee
+- **Scoreboard Screen:** Scores animate from previous values, guest cards smoothly reorder, detailed prediction table slides up after 5 seconds
+- **Responsive:** All screens adapt to different resolutions using viewport-based sizing
+- **Customizable backgrounds:** Place images in `server/data/backgrounds/`:
+  - `bg-logo.png` - Logo screen background
+  - `bg-award.png` - Award screen background
+  - `bg-scoreboard.png` - Scoreboard background
 
 ## Animations
 
@@ -137,6 +166,14 @@ All animations use Framer Motion:
 - Nominee cards: 2-second stagger on appearance
 - Predictor avatars: 100ms stagger after all nominees appear
 - Winner card: Scale up + gold glow animation
-- Score counter: Animated from 0 to value over 2 seconds
-- Guest cards: Smooth repositioning when scores change
+- Score counter: Animates from previous score to new score over 2 seconds
+- Guest cards: Smooth repositioning when scores change (layout animation)
 - Scores table: Slides up from bottom after 5 seconds
+
+## Responsive Design
+
+- Nominee images use viewport-based sizing (vw units)
+- Categories with more than 5 nominees (e.g., Best Picture) automatically split into 2 rows
+- All images maintain 2:3 aspect ratio
+- Font sizes use `clamp()` for responsive scaling
+- Guest cards on scoreboard scale based on number of guests
