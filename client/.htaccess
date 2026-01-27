@@ -1,0 +1,42 @@
+# Oscar Suite - .htaccess for oscars.shucklecodes.com
+# Place this in the subdomain's public_html directory
+
+# Enable RewriteEngine
+RewriteEngine On
+
+# Proxy WebSocket connections to Node.js app
+RewriteCond %{HTTP:Upgrade} =websocket [NC]
+RewriteRule /socket.io/(.*) ws://localhost:8001/socket.io/$1 [P,L]
+
+# Proxy Socket.io polling to Node.js app
+RewriteRule ^socket.io/(.*) http://localhost:8001/socket.io/$1 [P,L]
+
+# Proxy API requests to Node.js app
+RewriteRule ^api/(.*) http://localhost:8001/api/$1 [P,L]
+
+# Proxy data requests to Node.js app (for static files and legacy routes)
+RewriteRule ^data/(.*) http://localhost:8001/data/$1 [P,L]
+
+# Proxy upload requests to Node.js app
+RewriteRule ^upload/(.*) http://localhost:8001/upload/$1 [P,L]
+
+# Handle React Router - serve index.html for all non-file routes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
+
+# Enable gzip compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/javascript application/json
+</IfModule>
+
+# Cache static assets
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
