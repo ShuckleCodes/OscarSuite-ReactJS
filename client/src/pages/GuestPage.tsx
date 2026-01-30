@@ -16,7 +16,7 @@ import {
   IconButton,
   Snackbar,
 } from '@mui/material';
-import { PhotoCamera } from '@mui/icons-material';
+import { PhotoCamera, Tv } from '@mui/icons-material';
 import { useAwards } from '../hooks/useAwards';
 import { useGuests, useUpdateGuest } from '../hooks/useGuests';
 import { useRooms } from '../hooks/useRooms';
@@ -25,6 +25,7 @@ import { useSocket } from '../context/SocketContext';
 import { uploadPhoto } from '../api';
 import type { Guest, Award } from '../types';
 import AwardCard from '../components/guest/AwardCard';
+import { Link } from 'react-router-dom';
 
 export default function GuestPage() {
   const { data: awards = [] } = useAwards();
@@ -164,6 +165,18 @@ export default function GuestPage() {
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
+      {/* Link to Display */}
+      <Box sx={{ textAlign: 'right', mb: 2 }}>
+        <Button
+          component={Link}
+          to="/display"
+          startIcon={<Tv />}
+          sx={{ color: 'primary.main' }}
+        >
+          View Display
+        </Button>
+      </Box>
+
       <Box sx={{ textAlign: 'center', mb: 4 }}>
         <Typography variant="h3" component="h1" sx={{ color: 'primary.main', fontWeight: 700 }}>
           Oscar Predictions

@@ -272,10 +272,11 @@ export default function ScoreboardScreen({
         <AnimatePresence>
           {sortedGuests.map((guest) => {
             const isLeader = (guest.displayScore || 0) === maxScore && maxScore > 0;
-            // Calculate responsive card width based on number of guests
+            // Calculate responsive card width based on number of guests (max 10 per row)
             const guestCount = sortedGuests.length;
-            const cardWidth = `${Math.min(15, 90 / Math.max(guestCount, 3))}vw`;
-            const photoSize = `${Math.min(8, 45 / Math.max(guestCount, 3))}vw`;
+            const cardsPerRow = Math.min(guestCount, 10);
+            const cardWidth = `${Math.min(15, 90 / Math.max(cardsPerRow, 3))}vw`;
+            const photoSize = `${Math.min(8, 45 / Math.max(cardsPerRow, 3))}vw`;
 
             return (
               <motion.div

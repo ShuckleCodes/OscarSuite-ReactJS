@@ -23,6 +23,7 @@ server/data/backgrounds/
 # IDE
 .vscode/
 .idea/
+CLAUDE.md
 
 # OS files
 .DS_Store
