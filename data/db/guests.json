@@ -1,0 +1,12 @@
+{
+  "guests": [
+    {
+      "name": "Guest 1",
+      "photo": "",
+      "predictions": {},
+      "rooms": [
+        "rm1"
+      ]
+    }
+  ]
+}
