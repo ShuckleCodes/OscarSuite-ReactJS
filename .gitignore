@@ -16,10 +16,6 @@ server/data/db/*.json
 # Uploaded guest photos
 server/data/guests/
 
-# Copyrighted images (nominee photos, backgrounds)
-server/data/nominees/
-server/data/backgrounds/
-
 # IDE
 .vscode/
 .idea/

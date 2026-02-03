@@ -75,7 +75,7 @@ app.get('/health', (req, res) => {
 
 // Start server
 httpServer.listen(PORT, () => {
-  console.log(`Oscar Suite Server running on port ${PORT}`);
+  console.log(`Awards Show Suite Server running on port ${PORT}`);
   console.log(`API: http://localhost:${PORT}/api`);
   console.log(`WebSocket: ws://localhost:${PORT}`);
 });

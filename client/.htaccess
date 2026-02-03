@@ -1,4 +1,4 @@
-# Oscar Suite - .htaccess for oscars.shucklecodes.com
+# Awards Show Suite - .htaccess for SPA routing
 # Place this in the subdomain's public_html directory
 
 # Enable RewriteEngine

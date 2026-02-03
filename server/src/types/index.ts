@@ -1,4 +1,4 @@
-// TypeScript interfaces for Oscar Suite
+// TypeScript interfaces for Awards Show Suite
 
 export interface Nominee {
   id: number;

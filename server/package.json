@@ -1,7 +1,7 @@
 {
-  "name": "oscar-suite-server",
+  "name": "awards-show-suite-server",
   "version": "1.0.0",
-  "description": "Oscar Suite Node.js/Express backend",
+  "description": "Awards Show Suite Node.js/Express backend",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",

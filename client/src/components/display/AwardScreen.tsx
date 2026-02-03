@@ -11,7 +11,7 @@ interface AwardScreenProps {
 export default function AwardScreen({ award, guests, winnerId }: AwardScreenProps) {
   const getImageUrl = (image: string) => `/data/nominees/${image}`;
   const getGuestPhotoUrl = (photo: string) => {
-    if (!photo) return '/data/backgrounds/oscar.png';
+    if (!photo) return '/data/backgrounds/trophy.png';
     return `/data/${photo}`;
   };
 

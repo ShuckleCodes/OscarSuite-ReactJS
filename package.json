@@ -1,7 +1,7 @@
 {
-  "name": "oscar-suite",
+  "name": "awards-show-suite",
   "version": "1.0.0",
-  "description": "Oscar predictions party app",
+  "description": "Awards show predictions party app",
   "scripts": {
     "start": "node server/dist/index.js",
     "dev": "cd server && npm run dev",

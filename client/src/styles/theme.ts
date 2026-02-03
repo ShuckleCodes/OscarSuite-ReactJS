@@ -1,17 +1,17 @@
 import { createTheme } from '@mui/material/styles';
 
-// Oscar gold color palette
-const oscarGold = '#C9A227';
-const oscarGoldLight = '#E6C867';
-const oscarGoldDark = '#8B7019';
+// Gold color palette
+const awardGold = '#C9A227';
+const awardGoldLight = '#E6C867';
+const awardGoldDark = '#8B7019';
 
 export const theme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: oscarGold,
-      light: oscarGoldLight,
-      dark: oscarGoldDark,
+      main: awardGold,
+      light: awardGoldLight,
+      dark: awardGoldDark,
       contrastText: '#000000'
     },
     secondary: {

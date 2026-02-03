@@ -1,14 +1,8 @@
-# Oscar Suite (React.js + Node.js)
+# Awards Show Suite (React.js + Node.js)
 
-A web-based application for hosting Oscar prediction parties. Guests submit their predictions for Academy Award winners, and the app displays nominees, tracks scores, and shows a live scoreboard as winners are announced.
+A web-based application for hosting awards show prediction parties. Guests submit their predictions for award winners, and the app displays nominees, tracks scores, and shows a live scoreboard as winners are announced.
 
-## Disclaimer
-
-This project is for **personal, non-commercial use only**. It is not affiliated with, endorsed by, or connected to the Academy of Motion Picture Arts and Sciences.
-
-- "Oscar," "Oscars," "Academy Awards," and the Oscar statuette design are trademarks and copyrighted property of the Academy of Motion Picture Arts and Sciences.
-- Nominee images and movie artwork are not included in this repository and must be sourced separately for personal use.
-- This software is provided as-is for private Oscar party entertainment purposes.
+Works with any awards show - customize the categories and nominees in `awards.json`.
 
 ## Tech Stack
 
@@ -20,7 +14,7 @@ This project is for **personal, non-commercial use only**. It is not affiliated 
 ## Project Structure
 
 ```
-OscarSuiteReactJS/
+AwardsShowSuite/
 ├── server/                 # Node.js backend
 │   ├── src/
 │   │   ├── index.ts        # Entry point
@@ -74,12 +68,12 @@ OscarSuiteReactJS/
                               #   - bg-logo.png
                               #   - bg-award.png
                               #   - bg-scoreboard.png
-                              #   - oscar.png (default guest avatar)
+                              #   - trophy.png (default guest avatar)
    ```
 
 4. **Update awards data:**
 
-   Edit `server/data/awards.json` to match your nominee images and current year's nominations.
+   Edit `server/data/awards.json` to match your nominee images and award categories.
 
 ### Development
 
@@ -173,7 +167,16 @@ All animations use Framer Motion:
 ## Responsive Design
 
 - Nominee images use viewport-based sizing (vw units)
-- Categories with more than 5 nominees (e.g., Best Picture) automatically split into 2 rows
+- Categories with more than 5 nominees automatically split into 2 rows
 - All images maintain 2:3 aspect ratio
 - Font sizes use `clamp()` for responsive scaling
 - Guest cards on scoreboard scale based on number of guests
+
+## Customization
+
+To use this for any awards show:
+
+1. Edit `server/data/awards.json` with your categories and nominees
+2. Add nominee images to `server/data/nominees/`
+3. Customize background images in `server/data/backgrounds/`
+4. Update the title in `client/src/components/display/LogoScreen.tsx` if desired

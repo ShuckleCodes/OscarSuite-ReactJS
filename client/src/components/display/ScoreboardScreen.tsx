@@ -29,7 +29,7 @@ interface AnimatedGuest extends GuestWithScore {
   oldScore: number;
 }
 
-const STORAGE_KEY = 'oscar-scoreboard-scores';
+const STORAGE_KEY = 'awards-scoreboard-scores';
 
 export default function ScoreboardScreen({
   guests,
@@ -144,7 +144,7 @@ export default function ScoreboardScreen({
   const maxScore = sortedGuests.length > 0 ? Math.max(...sortedGuests.map(g => g.score || 0)) : 0;
 
   const getPhotoUrl = (photo: string) => {
-    if (!photo) return '/data/backgrounds/oscar.png';
+    if (!photo) return '/data/backgrounds/trophy.png';
     return `/data/${photo}`;
   };
 

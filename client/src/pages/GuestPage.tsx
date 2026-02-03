@@ -154,7 +154,7 @@ export default function GuestPage() {
   };
 
   const getPhotoUrl = (photo: string | undefined) => {
-    if (!photo) return '/data/backgrounds/oscar.png';
+    if (!photo) return '/data/backgrounds/trophy.png';
     return `/data/${photo}`;
   };
 
@@ -179,10 +179,10 @@ export default function GuestPage() {
 
       <Box sx={{ textAlign: 'center', mb: 4 }}>
         <Typography variant="h3" component="h1" sx={{ color: 'primary.main', fontWeight: 700 }}>
-          Oscar Predictions
+          Awards Predictions
         </Typography>
         <Typography variant="subtitle1" color="text.secondary">
-          Submit your predictions for the Academy Awards
+          Submit your predictions for tonight's awards
         </Typography>
       </Box>
 

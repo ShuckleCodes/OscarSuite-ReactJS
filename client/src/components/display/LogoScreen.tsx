@@ -98,8 +98,8 @@ export default function LogoScreen({ awards }: LogoScreenProps) {
       >
         <Box
           component="img"
-          src="/data/backgrounds/oscar.png"
-          alt="Oscar"
+          src="/data/backgrounds/trophy.png"
+          alt="Trophy"
           sx={{
             width: 200,
             height: 'auto',
@@ -128,7 +128,7 @@ export default function LogoScreen({ awards }: LogoScreenProps) {
             textShadow: '0 0 20px rgba(201, 162, 39, 0.5)'
           }}
         >
-          98th Annual Academy Awards
+          Awards Night
         </Typography>
       </motion.div>
 
