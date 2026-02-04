@@ -82,6 +82,11 @@ export default function AdminPage() {
   const predictionsLocked = appState?.predictions_locked ?? false;
   const selectedAward = awards.find((a: Award) => a.id === selectedAwardId);
 
+  // Set page title
+  useEffect(() => {
+    document.title = 'Admin - Awards Show Suite';
+  }, []);
+
   // Sort guests by score
   const sortedGuests = [...guests].sort((a, b) => (b.score || 0) - (a.score || 0));
 

@@ -33,6 +33,12 @@ export default function DisplayPage() {
     }
   }, [appState]);
 
+  // Set page title based on current screen mode
+  useEffect(() => {
+    const modeNames = { logo: 'Logo', award: 'Award', scoreboard: 'Scoreboard' };
+    document.title = `${modeNames[screenMode]} - Awards Show Suite`;
+  }, [screenMode]);
+
   // Listen for WebSocket events
   const handleMessage = useCallback((data: unknown) => {
     const message = data as string;

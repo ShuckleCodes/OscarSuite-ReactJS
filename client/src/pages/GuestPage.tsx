@@ -50,6 +50,11 @@ export default function GuestPage() {
   const selectedGuest = guests.find((g: Guest) => g.id === selectedGuestId);
   const predictionsLocked = appState?.predictions_locked ?? false;
 
+  // Set page title
+  useEffect(() => {
+    document.title = 'Predictions - Awards Show Suite';
+  }, []);
+
   // Calculate progress
   const completedCount = Object.values(predictions).filter(Boolean).length;
   const progressPercent = awards.length > 0 ? (completedCount / awards.length) * 100 : 0;

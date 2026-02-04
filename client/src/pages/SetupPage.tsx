@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Container,
   Box,
@@ -52,6 +52,11 @@ export default function SetupPage() {
   const updateNominee = useUpdateNominee();
   const deleteNomineeMutation = useDeleteNominee();
   const setEventTitle = useSetEventTitle();
+
+  // Set page title
+  useEffect(() => {
+    document.title = 'Setup - Awards Show Suite';
+  }, []);
 
   // Event title state
   const [eventTitleInput, setEventTitleInput] = useState('');
