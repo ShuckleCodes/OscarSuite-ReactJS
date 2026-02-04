@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Award, Guest, GuestWithScore, Room, AppState } from '../types';
+import type { Award, Guest, GuestWithScore, Room, AppState, Nominee } from '../types';
 
 const api = axios.create({
   baseURL: '/api'
@@ -9,6 +9,55 @@ const api = axios.create({
 export const getAwards = async (): Promise<Award[]> => {
   const { data } = await api.get('/awards');
   return data;
+};
+
+export const getAwardById = async (awardId: number): Promise<Award | null> => {
+  try {
+    const { data } = await api.get(`/awards/${awardId}`);
+    return data;
+  } catch {
+    return null;
+  }
+};
+
+export const createAward = async (name: string): Promise<Award> => {
+  const { data } = await api.post('/awards', { name });
+  return data;
+};
+
+export const updateAward = async (
+  awardId: number,
+  updates: { name?: string; nominees?: Nominee[] }
+): Promise<Award> => {
+  const { data } = await api.put(`/awards/${awardId}`, updates);
+  return data;
+};
+
+export const deleteAward = async (awardId: number): Promise<void> => {
+  await api.delete(`/awards/${awardId}`);
+};
+
+// Nominees
+export const createNominee = async (
+  awardId: number,
+  name: string,
+  image?: string
+): Promise<Nominee> => {
+  const { data } = await api.post(`/awards/${awardId}/nominees`, { name, image });
+  return data;
+};
+
+export const updateNominee = async (
+  awardId: number,
+  nomineeId: number,
+  updates: { name?: string; image?: string }
+): Promise<Nominee> => {
+  const { data } = await api.put(`/awards/${awardId}/nominees/${nomineeId}`, updates);
+  return data;
+};
+
+export const deleteNominee = async (awardId: number, nomineeId: number): Promise<void> => {
+  await api.delete(`/awards/${awardId}/nominees/${nomineeId}`);
 };
 
 // Rooms
@@ -104,11 +153,24 @@ export const resetAppState = async (): Promise<void> => {
   await api.post('/app-state/reset');
 };
 
+export const setEventTitle = async (title: string): Promise<void> => {
+  await api.put('/app-state/event-title', { title });
+};
+
 // Upload
 export const uploadPhoto = async (file: File): Promise<{ filename: string; path: string }> => {
   const formData = new FormData();
   formData.append('file', file);
   const { data } = await api.post('/upload/photo', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+  return data;
+};
+
+export const uploadNomineeImage = async (file: File): Promise<{ filename: string; path: string }> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const { data } = await api.post('/upload/nominee-image', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   });
   return data;

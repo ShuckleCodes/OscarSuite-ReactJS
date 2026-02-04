@@ -61,4 +61,19 @@ router.post('/reset', async (req, res) => {
   }
 });
 
+// PUT /api/app-state/event-title - Set event title
+router.put('/event-title', async (req, res) => {
+  try {
+    const { title } = req.body;
+    if (!title || typeof title !== 'string') {
+      return res.status(400).json({ error: 'Title is required' });
+    }
+    await db.setEventTitle(title);
+    res.status(200).send();
+  } catch (error) {
+    console.error('Error setting event title:', error);
+    res.status(500).json({ error: 'Failed to set event title' });
+  }
+});
+
 export default router;

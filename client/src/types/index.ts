@@ -36,6 +36,7 @@ export interface AppState {
   predictions_locked: boolean;
   current_award_id: number | null;
   winners: Record<string, number>;
+  event_title: string;
 }
 
 export type ScreenMode = 'logo' | 'award' | 'scoreboard';

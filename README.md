@@ -176,7 +176,11 @@ All animations use Framer Motion:
 
 To use this for any awards show:
 
-1. Edit `server/data/awards.json` with your categories and nominees
-2. Add nominee images to `server/data/nominees/`
+1. Edit categories and nominees via the `/setup` page (or directly in `server/data/db/awards.json`)
+2. Add nominee images to `server/data/nominees/` or upload them through the Setup UI
 3. Customize background images in `server/data/backgrounds/`
-4. Update the title in `client/src/components/display/LogoScreen.tsx` if desired
+4. Update the event title via the `/setup` page
+
+## Acknowledgments
+
+Inspired by the [Taskmaster Suite](https://github.com/LocoMH/TaskmasterSuite) project by LocoMH, customized for award show parties.

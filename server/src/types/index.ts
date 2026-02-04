@@ -34,6 +34,7 @@ export interface AppState {
   predictions_locked: boolean;
   current_award_id: number | null;
   winners: Record<string, number>;
+  event_title: string;
 }
 
 export interface GuestCreate {
@@ -62,4 +63,30 @@ export interface SetWinner {
 
 export interface LockPredictions {
   locked: boolean;
+}
+
+// Awards Database types
+export interface AwardsDB {
+  awards: Award[];
+  nextAwardId: number;
+  nextNomineeId: number;
+}
+
+export interface AwardCreate {
+  name: string;
+}
+
+export interface AwardUpdate {
+  name?: string;
+  nominees?: Nominee[];
+}
+
+export interface NomineeCreate {
+  name: string;
+  image?: string;
+}
+
+export interface NomineeUpdate {
+  name?: string;
+  image?: string;
 }

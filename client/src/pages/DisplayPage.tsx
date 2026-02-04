@@ -105,7 +105,7 @@ export default function DisplayPage() {
     >
       <AnimatePresence mode="wait">
         {screenMode === 'logo' && (
-          <LogoScreen key="logo" awards={awards} />
+          <LogoScreen key="logo" awards={awards} eventTitle={appState?.event_title} />
         )}
 
         {screenMode === 'award' && currentAward && (

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getAppState, setPredictionsLocked, setWinner, clearWinner, resetAppState } from '../api';
+import { getAppState, setPredictionsLocked, setWinner, clearWinner, resetAppState, setEventTitle } from '../api';
 
 export function useAppState() {
   return useQuery({
@@ -54,6 +54,17 @@ export function useResetAppState() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appState'] });
       queryClient.invalidateQueries({ queryKey: ['guestsWithScores'] });
+    }
+  });
+}
+
+export function useSetEventTitle() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: setEventTitle,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appState'] });
     }
   });
 }

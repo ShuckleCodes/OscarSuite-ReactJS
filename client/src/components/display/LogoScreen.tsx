@@ -5,9 +5,10 @@ import type { Award } from '../../types';
 
 interface LogoScreenProps {
   awards: Award[];
+  eventTitle?: string;
 }
 
-export default function LogoScreen({ awards }: LogoScreenProps) {
+export default function LogoScreen({ awards, eventTitle = 'Awards Night' }: LogoScreenProps) {
   const [currentAward, setCurrentAward] = useState<Award | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const lastAwardIndex = useRef(-1);
@@ -128,7 +129,7 @@ export default function LogoScreen({ awards }: LogoScreenProps) {
             textShadow: '0 0 20px rgba(201, 162, 39, 0.5)'
           }}
         >
-          Awards Night
+          {eventTitle}
         </Typography>
       </motion.div>
 

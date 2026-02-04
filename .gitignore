@@ -19,7 +19,9 @@ server/data/guests/
 # IDE
 .vscode/
 .idea/
-CLAUDE.md
+
+# Claude Code local settings
+.claude/
 
 # OS files
 .DS_Store

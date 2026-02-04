@@ -2,7 +2,7 @@ import { Low } from 'lowdb';
 import { JSONFile } from 'lowdb/node';
 import path from 'path';
 import fs from 'fs';
-import type { Award, Guest, GuestWithScore, Room, AppState } from '../types/index.js';
+import type { Award, Guest, GuestWithScore, Room, AppState, AwardsDB, AwardCreate, AwardUpdate, NomineeCreate, NomineeUpdate, Nominee } from '../types/index.js';
 
 // Database types
 interface GuestRecord {
@@ -29,6 +29,7 @@ interface AppStateDB {
   predictions_locked: boolean;
   current_award_id: number | null;
   winners: Record<string, number>;
+  event_title: string;
 }
 
 // Data directory paths
@@ -44,6 +45,7 @@ if (!fs.existsSync(DB_DIR)) {
 let guestsDb: Low<GuestsDB> | null = null;
 let roomsDb: Low<RoomsDB> | null = null;
 let appStateDb: Low<AppStateDB> | null = null;
+let awardsDb: Low<AwardsDB> | null = null;
 
 // Initialize databases with defaults
 async function getGuestsDb(): Promise<Low<GuestsDB>> {
@@ -81,27 +83,181 @@ async function getAppStateDb(): Promise<Low<AppStateDB>> {
       appStateDb.data = {
         predictions_locked: false,
         current_award_id: null,
-        winners: {}
+        winners: {},
+        event_title: 'Awards Night'
       };
+      await appStateDb.write();
+    }
+    // Migrate existing db: add event_title if missing
+    if (appStateDb.data.event_title === undefined) {
+      appStateDb.data.event_title = 'Awards Night';
       await appStateDb.write();
     }
   }
   return appStateDb;
 }
 
-// Load awards from JSON file
-export function loadAwards(): Award[] {
-  const awardsPath = path.join(DATA_DIR, 'awards.json');
-  if (fs.existsSync(awardsPath)) {
-    const data = JSON.parse(fs.readFileSync(awardsPath, 'utf-8'));
-    return data.awards || [];
+// Awards Database with migration support
+async function getAwardsDb(): Promise<Low<AwardsDB>> {
+  if (!awardsDb) {
+    const dbPath = path.join(DB_DIR, 'awards.json');
+    const staticPath = path.join(DATA_DIR, 'awards.json');
+    const adapter = new JSONFile<AwardsDB>(dbPath);
+    awardsDb = new Low<AwardsDB>(adapter);
+    await awardsDb.read();
+
+    // Migration: if db doesn't exist but static file does, migrate
+    if (!awardsDb.data && fs.existsSync(staticPath)) {
+      const staticData = JSON.parse(fs.readFileSync(staticPath, 'utf-8'));
+      const awards: Award[] = staticData.awards || [];
+
+      // Calculate next IDs based on existing data
+      let maxAwardId = 0;
+      let maxNomineeId = 0;
+      for (const award of awards) {
+        if (award.id > maxAwardId) maxAwardId = award.id;
+        for (const nominee of award.nominees) {
+          if (nominee.id > maxNomineeId) maxNomineeId = nominee.id;
+        }
+      }
+
+      awardsDb.data = {
+        awards,
+        nextAwardId: maxAwardId + 1,
+        nextNomineeId: maxNomineeId + 1
+      };
+      await awardsDb.write();
+    }
+
+    // Default empty database
+    if (!awardsDb.data) {
+      awardsDb.data = {
+        awards: [],
+        nextAwardId: 1,
+        nextNomineeId: 1
+      };
+      await awardsDb.write();
+    }
   }
-  return [];
+  return awardsDb;
 }
 
-// Awards
+// Awards CRUD
 export async function getAwards(): Promise<Award[]> {
-  return loadAwards();
+  const db = await getAwardsDb();
+  await db.read();
+  return db.data!.awards || [];
+}
+
+export async function getAwardById(awardId: number): Promise<Award | null> {
+  const awards = await getAwards();
+  return awards.find((a: Award) => a.id === awardId) || null;
+}
+
+export async function createAward(data: AwardCreate): Promise<Award> {
+  const db = await getAwardsDb();
+  await db.read();
+
+  const newAward: Award = {
+    id: db.data!.nextAwardId,
+    name: data.name,
+    nominees: []
+  };
+
+  db.data!.awards.push(newAward);
+  db.data!.nextAwardId += 1;
+  await db.write();
+  return newAward;
+}
+
+export async function updateAward(awardId: number, data: AwardUpdate): Promise<Award | null> {
+  const db = await getAwardsDb();
+  await db.read();
+
+  const index = db.data!.awards.findIndex((a: Award) => a.id === awardId);
+  if (index === -1) return null;
+
+  const award = db.data!.awards[index];
+  if (data.name !== undefined) award.name = data.name;
+  if (data.nominees !== undefined) award.nominees = data.nominees;
+
+  await db.write();
+  return award;
+}
+
+export async function deleteAward(awardId: number): Promise<boolean> {
+  const db = await getAwardsDb();
+  await db.read();
+
+  const index = db.data!.awards.findIndex((a: Award) => a.id === awardId);
+  if (index === -1) return false;
+
+  db.data!.awards.splice(index, 1);
+  await db.write();
+
+  // Clear winner if this award had one
+  await clearWinner(awardId);
+
+  return true;
+}
+
+// Nominees CRUD
+export async function createNominee(awardId: number, data: NomineeCreate): Promise<Nominee | null> {
+  const db = await getAwardsDb();
+  await db.read();
+
+  const award = db.data!.awards.find((a: Award) => a.id === awardId);
+  if (!award) return null;
+
+  const newNominee: Nominee = {
+    id: db.data!.nextNomineeId,
+    name: data.name,
+    image: data.image || ''
+  };
+
+  award.nominees.push(newNominee);
+  db.data!.nextNomineeId += 1;
+  await db.write();
+  return newNominee;
+}
+
+export async function updateNominee(awardId: number, nomineeId: number, data: NomineeUpdate): Promise<Nominee | null> {
+  const db = await getAwardsDb();
+  await db.read();
+
+  const award = db.data!.awards.find((a: Award) => a.id === awardId);
+  if (!award) return null;
+
+  const nominee = award.nominees.find((n: Nominee) => n.id === nomineeId);
+  if (!nominee) return null;
+
+  if (data.name !== undefined) nominee.name = data.name;
+  if (data.image !== undefined) nominee.image = data.image;
+
+  await db.write();
+  return nominee;
+}
+
+export async function deleteNominee(awardId: number, nomineeId: number): Promise<boolean> {
+  const db = await getAwardsDb();
+  await db.read();
+
+  const award = db.data!.awards.find((a: Award) => a.id === awardId);
+  if (!award) return false;
+
+  const index = award.nominees.findIndex((n: Nominee) => n.id === nomineeId);
+  if (index === -1) return false;
+
+  award.nominees.splice(index, 1);
+  await db.write();
+
+  // Clear winner if this nominee was the winner
+  const appState = await getAppState();
+  if (appState.winners[String(awardId)] === nomineeId) {
+    await clearWinner(awardId);
+  }
+
+  return true;
 }
 
 // Rooms
@@ -251,8 +407,16 @@ export async function getAppState(): Promise<AppState> {
   return {
     predictions_locked: db.data!.predictions_locked ?? false,
     current_award_id: db.data!.current_award_id ?? null,
-    winners: db.data!.winners || {}
+    winners: db.data!.winners || {},
+    event_title: db.data!.event_title ?? 'Awards Night'
   };
+}
+
+export async function setEventTitle(title: string): Promise<void> {
+  const db = await getAppStateDb();
+  await db.read();
+  db.data!.event_title = title;
+  await db.write();
 }
 
 export async function setPredictionsLocked(locked: boolean): Promise<void> {

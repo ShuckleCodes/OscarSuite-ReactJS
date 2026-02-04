@@ -6,14 +6,7 @@
       "nominees": [
         { "id": 1, "name": "Nominee 1", "image": "Category1nominee1.jpg" },
         { "id": 2, "name": "Nominee 2", "image": "Category1nominee2.jpg" },
-        { "id": 3, "name": "Nominee 3", "image": "Category1nominee3.jpg" },
-        { "id": 4, "name": "Nominee 4", "image": "Category1nominee4.jpg" },
-        { "id": 5, "name": "Nominee 5", "image": "Category1nominee5.jpg" },
-        { "id": 6, "name": "Nominee 6", "image": "Category1nominee6.jpg" },
-        { "id": 7, "name": "Nominee 7", "image": "Category1nominee7.jpg" },
-        { "id": 8, "name": "Nominee 8", "image": "Category1nominee8.jpg" },
-        { "id": 9, "name": "Nominee 9", "image": "Category1nominee9.jpg" },
-        { "id": 10, "name": "Nominee 10", "image": "Category1nominee10.jpg" }
+        { "id": 3, "name": "Nominee 3", "image": "Category1nominee3.jpg" }
       ]
     },
     {
