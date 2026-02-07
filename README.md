@@ -59,7 +59,20 @@ AwardsShowSuite/
    npm install
    ```
 
-3. **Set up images (not included in repo):**
+3. **Set up TMDB image search (optional):**
+
+   The app can search [The Movie Database (TMDB)](https://www.themoviedb.org/) for nominee and movie images directly from the Setup page. To enable this:
+
+   1. Create a free account at [themoviedb.org](https://www.themoviedb.org/signup)
+   2. Go to **Settings > API** and request an API key (choose "Developer" / personal use)
+   3. Create a `server/.env` file (see `server/.env.example`) and add your key:
+      ```
+      TMDB_API_KEY=your_api_key_here
+      ```
+
+   Without a TMDB key the app works normally -- you just won't be able to use the TMDB search feature in the Setup page. You can still upload images manually or browse the image gallery.
+
+5. **Set up images (not included in repo):**
 
    Create the following directories and add your own images:
    ```
@@ -71,7 +84,7 @@ AwardsShowSuite/
                               #   - trophy.png (default guest avatar)
    ```
 
-4. **Update awards data:**
+6. **Update awards data:**
 
    Edit `server/data/awards.json` to match your nominee images and award categories.
 
