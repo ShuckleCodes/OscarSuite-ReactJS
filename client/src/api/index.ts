@@ -41,16 +41,17 @@ export const deleteAward = async (awardId: number): Promise<void> => {
 export const createNominee = async (
   awardId: number,
   name: string,
-  image?: string
+  image?: string,
+  subHeading?: string
 ): Promise<Nominee> => {
-  const { data } = await api.post(`/awards/${awardId}/nominees`, { name, image });
+  const { data } = await api.post(`/awards/${awardId}/nominees`, { name, image, subHeading });
   return data;
 };
 
 export const updateNominee = async (
   awardId: number,
   nomineeId: number,
-  updates: { name?: string; image?: string }
+  updates: { name?: string; image?: string; subHeading?: string }
 ): Promise<Nominee> => {
   const { data } = await api.put(`/awards/${awardId}/nominees/${nomineeId}`, updates);
   return data;
@@ -173,5 +174,62 @@ export const uploadNomineeImage = async (file: File): Promise<{ filename: string
   const { data } = await api.post('/upload/nominee-image', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   });
+  return data;
+};
+
+// Nominee image listing
+export const getNomineeImages = async (): Promise<string[]> => {
+  const { data } = await api.get('/upload/nominee-images');
+  return data;
+};
+
+// TMDB types
+export interface TmdbMovieResult {
+  id: number;
+  title: string;
+  poster_path: string | null;
+  release_date: string;
+  overview: string;
+}
+
+export interface TmdbPersonResult {
+  id: number;
+  name: string;
+  profile_path: string | null;
+  known_for_department: string;
+}
+
+export interface TmdbTvResult {
+  id: number;
+  name: string;
+  poster_path: string | null;
+  first_air_date: string;
+  overview: string;
+}
+
+export interface TmdbSearchResponse<T> {
+  results: T[];
+  total_results: number;
+  total_pages: number;
+}
+
+// TMDB search functions
+export const searchTmdbMovies = async (query: string): Promise<TmdbSearchResponse<TmdbMovieResult>> => {
+  const { data } = await api.get('/tmdb/search/movie', { params: { query } });
+  return data;
+};
+
+export const searchTmdbPeople = async (query: string): Promise<TmdbSearchResponse<TmdbPersonResult>> => {
+  const { data } = await api.get('/tmdb/search/person', { params: { query } });
+  return data;
+};
+
+export const searchTmdbTv = async (query: string): Promise<TmdbSearchResponse<TmdbTvResult>> => {
+  const { data } = await api.get('/tmdb/search/tv', { params: { query } });
+  return data;
+};
+
+export const downloadTmdbImage = async (imagePath: string): Promise<{ filename: string }> => {
+  const { data } = await api.post('/tmdb/download-image', { imagePath });
   return data;
 };

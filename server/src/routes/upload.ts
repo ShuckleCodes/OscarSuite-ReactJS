@@ -66,6 +66,23 @@ const nomineeUpload = multer({
   limits: uploadLimits
 });
 
+// GET /api/upload/nominee-images - List all nominee images
+router.get('/nominee-images', (req, res) => {
+  try {
+    if (!fs.existsSync(NOMINEES_DIR)) {
+      return res.json([]);
+    }
+    const files = fs.readdirSync(NOMINEES_DIR).filter(f => {
+      const ext = path.extname(f).toLowerCase();
+      return ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext);
+    });
+    res.json(files);
+  } catch (error) {
+    console.error('Error listing nominee images:', error);
+    res.status(500).json({ error: 'Failed to list images' });
+  }
+});
+
 // POST /api/upload/photo - Upload a guest photo
 router.post('/photo', guestUpload.single('file'), (req, res) => {
   try {

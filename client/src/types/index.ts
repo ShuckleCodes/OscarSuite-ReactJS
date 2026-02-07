@@ -4,6 +4,7 @@ export interface Nominee {
   id: number;
   name: string;
   image: string;
+  subHeading?: string;
 }
 
 export interface Award {

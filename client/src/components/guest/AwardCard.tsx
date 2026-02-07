@@ -100,9 +100,16 @@ export default function AwardCard({ award, selectedNomineeId, onSelect, disabled
             >
               {selectedNominee.name[0]}
             </Avatar>
-            <Typography sx={{ color: 'primary.main', fontWeight: 500 }}>
-              {selectedNominee.name}
-            </Typography>
+            <Box>
+              <Typography sx={{ color: 'primary.main', fontWeight: 500 }}>
+                {selectedNominee.name}
+                {selectedNominee.subHeading && (
+                  <Typography component="span" sx={{ color: 'text.secondary', fontWeight: 400, ml: 0.5 }}>
+                    ({selectedNominee.subHeading})
+                  </Typography>
+                )}
+              </Typography>
+            </Box>
           </Box>
         )}
 
@@ -137,13 +144,20 @@ export default function AwardCard({ award, selectedNomineeId, onSelect, disabled
                     >
                       {nominee.name[0]}
                     </Avatar>
-                    <Typography
-                      sx={{
-                        color: selectedNomineeId === nominee.id ? 'primary.main' : 'text.primary'
-                      }}
-                    >
-                      {nominee.name}
-                    </Typography>
+                    <Box>
+                      <Typography
+                        sx={{
+                          color: selectedNomineeId === nominee.id ? 'primary.main' : 'text.primary'
+                        }}
+                      >
+                        {nominee.name}
+                      </Typography>
+                      {nominee.subHeading && (
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          {nominee.subHeading}
+                        </Typography>
+                      )}
+                    </Box>
                   </Box>
                 }
                 sx={{

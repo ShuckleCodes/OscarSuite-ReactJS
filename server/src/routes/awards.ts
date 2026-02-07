@@ -100,12 +100,12 @@ router.post('/:id/nominees', async (req, res) => {
       return res.status(400).json({ error: 'Invalid award ID' });
     }
 
-    const { name, image } = req.body;
+    const { name, image, subHeading } = req.body;
     if (!name || typeof name !== 'string') {
       return res.status(400).json({ error: 'Name is required' });
     }
 
-    const nominee = await db.createNominee(awardId, { name, image });
+    const nominee = await db.createNominee(awardId, { name, image, subHeading });
     if (!nominee) {
       return res.status(404).json({ error: 'Award not found' });
     }
@@ -127,8 +127,8 @@ router.put('/:awardId/nominees/:nomineeId', async (req, res) => {
       return res.status(400).json({ error: 'Invalid ID' });
     }
 
-    const { name, image } = req.body;
-    const nominee = await db.updateNominee(awardId, nomineeId, { name, image });
+    const { name, image, subHeading } = req.body;
+    const nominee = await db.updateNominee(awardId, nomineeId, { name, image, subHeading });
 
     if (!nominee) {
       return res.status(404).json({ error: 'Award or nominee not found' });

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { createServer } from 'http';
@@ -10,6 +11,7 @@ import roomsRouter from './routes/rooms.js';
 import guestsRouter from './routes/guests.js';
 import appStateRouter from './routes/appState.js';
 import uploadRouter from './routes/upload.js';
+import tmdbRouter from './routes/tmdb.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -29,6 +31,7 @@ app.use('/api/rooms', roomsRouter);
 app.use('/api/guests', guestsRouter);
 app.use('/api/app-state', appStateRouter);
 app.use('/api/upload', uploadRouter);
+app.use('/api/tmdb', tmdbRouter);
 
 // Legacy route aliases (for compatibility with existing clients)
 app.use('/data/awards', awardsRouter);

@@ -56,8 +56,8 @@ export function useCreateNominee() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ awardId, name, image }: { awardId: number; name: string; image?: string }) =>
-      createNominee(awardId, name, image),
+    mutationFn: ({ awardId, name, image, subHeading }: { awardId: number; name: string; image?: string; subHeading?: string }) =>
+      createNominee(awardId, name, image, subHeading),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['awards'] });
     }
@@ -75,7 +75,7 @@ export function useUpdateNominee() {
     }: {
       awardId: number;
       nomineeId: number;
-      updates: { name?: string; image?: string };
+      updates: { name?: string; image?: string; subHeading?: string };
     }) => updateNominee(awardId, nomineeId, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['awards'] });

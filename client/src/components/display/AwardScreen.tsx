@@ -148,6 +148,22 @@ export default function AwardScreen({ award, guests, winnerId }: AwardScreenProp
                 >
                   {nominee.name}
                 </Typography>
+                {nominee.subHeading && (
+                  <Typography
+                    sx={{
+                      color: isWinner ? 'primary.light' : 'grey.400',
+                      fontStyle: 'italic',
+                      fontSize: 'clamp(0.55rem, 0.8vw, 0.95rem)',
+                      bgcolor: 'rgba(0, 0, 0, 0.5)',
+                      px: 1,
+                      py: 0.25,
+                      borderRadius: 1,
+                      mt: 0.25,
+                    }}
+                  >
+                    {nominee.subHeading}
+                  </Typography>
+                )}
 
                 {/* Predictor Avatars */}
                 <Box

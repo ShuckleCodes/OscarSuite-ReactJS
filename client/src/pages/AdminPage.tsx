@@ -354,6 +354,7 @@ export default function AdminPage() {
                       >
                         {isWinner && '🏆 '}
                         {nominee.name}
+                        {nominee.subHeading && ` (${nominee.subHeading})`}
                       </Button>
                     );
                   })}

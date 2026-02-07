@@ -20,6 +20,14 @@ import {
   Alert,
   CardMedia,
   CardActions,
+  Tabs,
+  Tab,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  CircularProgress,
+  ImageList,
+  ImageListItem,
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
@@ -27,6 +35,8 @@ import {
   Edit as EditIcon,
   ArrowUpward as ArrowUpIcon,
   ArrowDownward as ArrowDownIcon,
+  Search as SearchIcon,
+  Collections as GalleryIcon,
 } from '@mui/icons-material';
 import {
   useAwards,
@@ -38,8 +48,45 @@ import {
   useDeleteNominee,
 } from '../hooks/useAwards';
 import { useAppState, useSetEventTitle } from '../hooks/useAppState';
-import { uploadNomineeImage } from '../api';
+import {
+  uploadNomineeImage,
+  searchTmdbMovies,
+  searchTmdbPeople,
+  searchTmdbTv,
+  downloadTmdbImage,
+  getNomineeImages,
+} from '../api';
+import type {
+  TmdbMovieResult,
+  TmdbPersonResult,
+  TmdbTvResult,
+} from '../api';
 import type { Award, Nominee } from '../types';
+
+type TmdbSearchType = 'movie' | 'person' | 'tv';
+type TmdbResult = TmdbMovieResult | TmdbPersonResult | TmdbTvResult;
+
+function getTmdbResultName(result: TmdbResult, type: TmdbSearchType): string {
+  if (type === 'movie') return (result as TmdbMovieResult).title;
+  return (result as TmdbPersonResult | TmdbTvResult).name;
+}
+
+function getTmdbResultImage(result: TmdbResult, type: TmdbSearchType): string | null {
+  if (type === 'person') return (result as TmdbPersonResult).profile_path;
+  return (result as TmdbMovieResult | TmdbTvResult).poster_path;
+}
+
+function getTmdbResultSubtitle(result: TmdbResult, type: TmdbSearchType): string {
+  if (type === 'movie') {
+    const m = result as TmdbMovieResult;
+    return m.release_date ? m.release_date.substring(0, 4) : '';
+  }
+  if (type === 'person') {
+    return (result as TmdbPersonResult).known_for_department || '';
+  }
+  const tv = result as TmdbTvResult;
+  return tv.first_air_date ? tv.first_air_date.substring(0, 4) : '';
+}
 
 export default function SetupPage() {
   const { data: awards = [], isLoading } = useAwards();
@@ -76,10 +123,25 @@ export default function SetupPage() {
   const [nomineeDialogMode, setNomineeDialogMode] = useState<'create' | 'edit'>('create');
   const [editingNomineeId, setEditingNomineeId] = useState<number | null>(null);
   const [nomineeName, setNomineeName] = useState('');
+  const [nomineeSubHeading, setNomineeSubHeading] = useState('');
   const [nomineeImage, setNomineeImage] = useState('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // TMDB search state
+  const [tmdbSearchQuery, setTmdbSearchQuery] = useState('');
+  const [tmdbSearchType, setTmdbSearchType] = useState<TmdbSearchType>('movie');
+  const [tmdbSearchBy, setTmdbSearchBy] = useState<'name' | 'subheading'>('name');
+  const [tmdbResults, setTmdbResults] = useState<TmdbResult[]>([]);
+  const [tmdbSearching, setTmdbSearching] = useState(false);
+
+  // Gallery state
+  const [showGallery, setShowGallery] = useState(false);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+
+  // Auto-suggested images
+  const [suggestedImages, setSuggestedImages] = useState<{ image: string; label: string }[]>([]);
 
   // Delete confirmation
   const [deleteAwardDialog, setDeleteAwardDialog] = useState(false);
@@ -88,6 +150,37 @@ export default function SetupPage() {
   const [deletingNomineeId, setDeletingNomineeId] = useState<number | null>(null);
 
   const selectedAward = awards.find((a: Award) => a.id === selectedAwardId);
+
+  // Auto-suggest images when nominee name or sub-heading changes
+  useEffect(() => {
+    if (!nomineeDialog) return;
+    const searchText = [nomineeName.toLowerCase(), nomineeSubHeading.toLowerCase()].filter(Boolean);
+    if (searchText.every(s => !s)) {
+      setSuggestedImages([]);
+      return;
+    }
+
+    const suggestions: { image: string; label: string }[] = [];
+    const seenImages = new Set<string>();
+
+    for (const award of awards) {
+      for (const nominee of award.nominees) {
+        if (!nominee.image || seenImages.has(nominee.image)) continue;
+        const nameMatch = searchText.some(s => nominee.name.toLowerCase().includes(s) || s.includes(nominee.name.toLowerCase()));
+        const subMatch = nominee.subHeading && searchText.some(s => nominee.subHeading!.toLowerCase().includes(s) || s.includes(nominee.subHeading!.toLowerCase()));
+        if (nameMatch || subMatch) {
+          // Don't suggest the current nominee's own image when editing
+          if (editingNomineeId && nominee.id === editingNomineeId) continue;
+          seenImages.add(nominee.image);
+          suggestions.push({
+            image: nominee.image,
+            label: `${nominee.name}${nominee.subHeading ? ` - ${nominee.subHeading}` : ''}`
+          });
+        }
+      }
+    }
+    setSuggestedImages(suggestions);
+  }, [nomineeName, nomineeSubHeading, awards, nomineeDialog, editingNomineeId]);
 
   // Award handlers
   const handleOpenCreateAward = () => {
@@ -157,18 +250,26 @@ export default function SetupPage() {
   const handleOpenCreateNominee = () => {
     setNomineeDialogMode('create');
     setNomineeName('');
+    setNomineeSubHeading('');
     setNomineeImage('');
     setImagePreview(null);
     setEditingNomineeId(null);
+    setTmdbSearchQuery('');
+    setTmdbResults([]);
+    setSuggestedImages([]);
     setNomineeDialog(true);
   };
 
   const handleOpenEditNominee = (nominee: Nominee) => {
     setNomineeDialogMode('edit');
     setNomineeName(nominee.name);
+    setNomineeSubHeading(nominee.subHeading || '');
     setNomineeImage(nominee.image);
     setImagePreview(nominee.image ? `/data/nominees/${nominee.image}` : null);
     setEditingNomineeId(nominee.id);
+    setTmdbSearchQuery('');
+    setTmdbResults([]);
+    setSuggestedImages([]);
     setNomineeDialog(true);
   };
 
@@ -196,6 +297,71 @@ export default function SetupPage() {
     }
   };
 
+  const handleTmdbSearch = async () => {
+    if (!tmdbSearchQuery.trim()) return;
+    setTmdbSearching(true);
+    try {
+      let results: TmdbResult[];
+      if (tmdbSearchType === 'movie') {
+        const resp = await searchTmdbMovies(tmdbSearchQuery);
+        results = resp.results;
+      } else if (tmdbSearchType === 'person') {
+        const resp = await searchTmdbPeople(tmdbSearchQuery);
+        results = resp.results;
+      } else {
+        const resp = await searchTmdbTv(tmdbSearchQuery);
+        results = resp.results;
+      }
+      setTmdbResults(results);
+    } catch (error) {
+      console.error('TMDB search failed:', error);
+    } finally {
+      setTmdbSearching(false);
+    }
+  };
+
+  const handleTmdbSelect = async (result: TmdbResult) => {
+    const name = getTmdbResultName(result, tmdbSearchType);
+    const imagePath = getTmdbResultImage(result, tmdbSearchType);
+
+    // Auto-fill name or sub-heading based on search mode
+    if (tmdbSearchBy === 'name') {
+      setNomineeName(name);
+    } else {
+      setNomineeSubHeading(name);
+    }
+
+    // Download and set image if available
+    if (imagePath) {
+      setUploading(true);
+      try {
+        const { filename } = await downloadTmdbImage(imagePath);
+        setNomineeImage(filename);
+        setImagePreview(`/data/nominees/${filename}`);
+      } catch (error) {
+        console.error('Failed to download TMDB image:', error);
+      } finally {
+        setUploading(false);
+      }
+    }
+  };
+
+  const handleSelectExistingImage = (filename: string) => {
+    setNomineeImage(filename);
+    setImagePreview(`/data/nominees/${filename}`);
+    setShowGallery(false);
+  };
+
+  const handleOpenGallery = async () => {
+    try {
+      const images = await getNomineeImages();
+      setExistingImages(images);
+      setShowGallery(true);
+    } catch (error) {
+      console.error('Failed to load gallery:', error);
+    }
+  };
+
   const handleSaveNominee = async () => {
     if (!nomineeName.trim() || !selectedAwardId) return;
 
@@ -203,21 +369,28 @@ export default function SetupPage() {
       await createNominee.mutateAsync({
         awardId: selectedAwardId,
         name: nomineeName.trim(),
-        image: nomineeImage
+        image: nomineeImage,
+        subHeading: nomineeSubHeading.trim() || undefined
       });
     } else if (editingNomineeId) {
       await updateNominee.mutateAsync({
         awardId: selectedAwardId,
         nomineeId: editingNomineeId,
-        updates: { name: nomineeName.trim(), image: nomineeImage }
+        updates: {
+          name: nomineeName.trim(),
+          image: nomineeImage,
+          subHeading: nomineeSubHeading.trim()
+        }
       });
     }
 
     setNomineeDialog(false);
     setNomineeName('');
+    setNomineeSubHeading('');
     setNomineeImage('');
     setImagePreview(null);
     setEditingNomineeId(null);
+    setTmdbResults([]);
   };
 
   const handleConfirmDeleteNominee = (nomineeId: number) => {
@@ -420,6 +593,11 @@ export default function SetupPage() {
                           <Typography variant="body2" noWrap title={nominee.name}>
                             {nominee.name}
                           </Typography>
+                          {nominee.subHeading && (
+                            <Typography variant="caption" color="text.secondary" noWrap title={nominee.subHeading}>
+                              {nominee.subHeading}
+                            </Typography>
+                          )}
                         </CardContent>
                         <CardActions sx={{ pt: 0 }}>
                           <IconButton size="small" onClick={() => handleOpenEditNominee(nominee)}>
@@ -473,50 +651,207 @@ export default function SetupPage() {
       </Dialog>
 
       {/* Nominee Dialog */}
-      <Dialog open={nomineeDialog} onClose={() => setNomineeDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog open={nomineeDialog} onClose={() => setNomineeDialog(false)} maxWidth="md" fullWidth>
         <DialogTitle>
           {nomineeDialogMode === 'create' ? 'Add Nominee' : 'Edit Nominee'}
         </DialogTitle>
         <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Nominee Name"
-            fullWidth
-            value={nomineeName}
-            onChange={(e) => setNomineeName(e.target.value)}
-            sx={{ mt: 1 }}
-          />
+          <Grid container spacing={2}>
+            {/* Left column: Name, Sub-heading, Image */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                autoFocus
+                margin="dense"
+                label="Nominee Name"
+                fullWidth
+                value={nomineeName}
+                onChange={(e) => setNomineeName(e.target.value)}
+                sx={{ mt: 1 }}
+              />
+              <TextField
+                margin="dense"
+                label="Sub-heading (optional)"
+                fullWidth
+                value={nomineeSubHeading}
+                onChange={(e) => setNomineeSubHeading(e.target.value)}
+                placeholder="e.g., movie title, show name"
+                size="small"
+              />
 
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              Nominee Image
-            </Typography>
-            <input
-              type="file"
-              accept="image/*"
-              ref={fileInputRef}
-              style={{ display: 'none' }}
-              onChange={handleImageSelect}
-            />
-            <Button
-              variant="outlined"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-            >
-              {uploading ? 'Uploading...' : 'Choose Image'}
-            </Button>
-
-            {imagePreview && (
-              <Box sx={{ mt: 2, textAlign: 'center' }}>
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  style={{ maxWidth: '100%', maxHeight: 200, objectFit: 'contain' }}
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  Nominee Image
+                </Typography>
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={fileInputRef}
+                  style={{ display: 'none' }}
+                  onChange={handleImageSelect}
                 />
+                <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                  >
+                    Upload File
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<GalleryIcon />}
+                    onClick={handleOpenGallery}
+                  >
+                    Browse Gallery
+                  </Button>
+                </Box>
+
+                {/* Auto-suggested images */}
+                {suggestedImages.length > 0 && (
+                  <Box sx={{ mt: 1 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      Suggested (from existing nominees):
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, mt: 0.5, flexWrap: 'wrap' }}>
+                      {suggestedImages.map((s) => (
+                        <Box
+                          key={s.image}
+                          onClick={() => handleSelectExistingImage(s.image)}
+                          sx={{
+                            cursor: 'pointer',
+                            border: nomineeImage === s.image ? '2px solid' : '1px solid',
+                            borderColor: nomineeImage === s.image ? 'primary.main' : 'grey.300',
+                            borderRadius: 1,
+                            overflow: 'hidden',
+                            width: 60,
+                            height: 60,
+                          }}
+                          title={s.label}
+                        >
+                          <img
+                            src={`/data/nominees/${s.image}`}
+                            alt={s.label}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        </Box>
+                      ))}
+                    </Box>
+                  </Box>
+                )}
+
+                {uploading && (
+                  <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CircularProgress size={16} />
+                    <Typography variant="caption">Downloading image...</Typography>
+                  </Box>
+                )}
+
+                {imagePreview && (
+                  <Box sx={{ mt: 2, textAlign: 'center' }}>
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      style={{ maxWidth: '100%', maxHeight: 200, objectFit: 'contain' }}
+                    />
+                  </Box>
+                )}
               </Box>
-            )}
-          </Box>
+            </Grid>
+
+            {/* Right column: TMDB Search */}
+            <Grid item xs={12} md={6}>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 1 }}>
+                TMDB Search
+              </Typography>
+
+              <RadioGroup
+                row
+                value={tmdbSearchBy}
+                onChange={(e) => setTmdbSearchBy(e.target.value as 'name' | 'subheading')}
+              >
+                <FormControlLabel value="name" control={<Radio size="small" />} label="Fill Name" />
+                <FormControlLabel value="subheading" control={<Radio size="small" />} label="Fill Sub-heading" />
+              </RadioGroup>
+
+              <Tabs
+                value={tmdbSearchType}
+                onChange={(_, v) => { setTmdbSearchType(v); setTmdbResults([]); }}
+                sx={{ minHeight: 36, mb: 1 }}
+              >
+                <Tab value="movie" label="Movie" sx={{ minHeight: 36, py: 0 }} />
+                <Tab value="person" label="Person" sx={{ minHeight: 36, py: 0 }} />
+                <Tab value="tv" label="TV Show" sx={{ minHeight: 36, py: 0 }} />
+              </Tabs>
+
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <TextField
+                  size="small"
+                  placeholder="Search TMDB..."
+                  fullWidth
+                  value={tmdbSearchQuery}
+                  onChange={(e) => setTmdbSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleTmdbSearch()}
+                />
+                <IconButton onClick={handleTmdbSearch} disabled={tmdbSearching || !tmdbSearchQuery.trim()}>
+                  <SearchIcon />
+                </IconButton>
+              </Box>
+
+              {tmdbSearching && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                  <CircularProgress size={24} />
+                </Box>
+              )}
+
+              {tmdbResults.length > 0 && (
+                <List dense sx={{ maxHeight: 300, overflow: 'auto', mt: 1 }}>
+                  {tmdbResults.slice(0, 10).map((result) => {
+                    const imgPath = getTmdbResultImage(result, tmdbSearchType);
+                    const thumbUrl = imgPath ? `https://image.tmdb.org/t/p/w92${imgPath}` : null;
+                    return (
+                      <ListItem
+                        key={result.id}
+                        onClick={() => handleTmdbSelect(result)}
+                        sx={{
+                          cursor: 'pointer',
+                          borderRadius: 1,
+                          '&:hover': { bgcolor: 'action.hover' }
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: '100%' }}>
+                          {thumbUrl ? (
+                            <img
+                              src={thumbUrl}
+                              alt=""
+                              style={{ width: 40, height: 60, objectFit: 'cover', borderRadius: 4 }}
+                            />
+                          ) : (
+                            <Box sx={{ width: 40, height: 60, bgcolor: 'grey.200', borderRadius: 1 }} />
+                          )}
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography variant="body2" noWrap>
+                              {getTmdbResultName(result, tmdbSearchType)}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {getTmdbResultSubtitle(result, tmdbSearchType)}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </ListItem>
+                    );
+                  })}
+                </List>
+              )}
+
+              {!tmdbSearching && tmdbResults.length === 0 && tmdbSearchQuery && (
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                  No results. Try searching above.
+                </Typography>
+              )}
+            </Grid>
+          </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setNomineeDialog(false)}>Cancel</Button>
@@ -527,6 +862,43 @@ export default function SetupPage() {
           >
             {nomineeDialogMode === 'create' ? 'Add' : 'Save'}
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Gallery Dialog */}
+      <Dialog open={showGallery} onClose={() => setShowGallery(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Image Gallery</DialogTitle>
+        <DialogContent>
+          {existingImages.length === 0 ? (
+            <Alert severity="info">No images available yet.</Alert>
+          ) : (
+            <ImageList cols={4} gap={8}>
+              {existingImages.map((img) => (
+                <ImageListItem
+                  key={img}
+                  onClick={() => handleSelectExistingImage(img)}
+                  sx={{
+                    cursor: 'pointer',
+                    border: nomineeImage === img ? '3px solid' : '1px solid',
+                    borderColor: nomineeImage === img ? 'primary.main' : 'grey.300',
+                    borderRadius: 1,
+                    overflow: 'hidden',
+                    '&:hover': { opacity: 0.8 }
+                  }}
+                >
+                  <img
+                    src={`/data/nominees/${img}`}
+                    alt={img}
+                    loading="lazy"
+                    style={{ height: 120, objectFit: 'cover' }}
+                  />
+                </ImageListItem>
+              ))}
+            </ImageList>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowGallery(false)}>Close</Button>
         </DialogActions>
       </Dialog>
 

@@ -212,7 +212,8 @@ export async function createNominee(awardId: number, data: NomineeCreate): Promi
   const newNominee: Nominee = {
     id: db.data!.nextNomineeId,
     name: data.name,
-    image: data.image || ''
+    image: data.image || '',
+    subHeading: data.subHeading || ''
   };
 
   award.nominees.push(newNominee);
@@ -233,6 +234,7 @@ export async function updateNominee(awardId: number, nomineeId: number, data: No
 
   if (data.name !== undefined) nominee.name = data.name;
   if (data.image !== undefined) nominee.image = data.image;
+  if (data.subHeading !== undefined) nominee.subHeading = data.subHeading;
 
   await db.write();
   return nominee;
