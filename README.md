@@ -110,6 +110,7 @@ AwardsShowSuite/
 - `/guest` - Guest prediction page
 - `/admin` - Admin control panel
 - `/display` - Audience display screen (for TV/projector)
+- `/setup` - Awards and nominee configuration
 
 ## API Endpoints
 
@@ -143,12 +144,25 @@ Messages are sent in format: `action+++param1+++param2`
 
 ## Features
 
+### Setup Page (`/setup`)
+- Set the event title
+- Add, rename, reorder, and delete award categories
+- Add nominees to each category with names, optional sub-headings, and images
+- Upload images manually or search TMDB (Movie Database) for movie posters and actor photos
+- Browse previously uploaded images from a gallery
+
+![Setup Page](Screenshots/SetupPage.png)
+
+![Setup Page - TMDB Search](Screenshots/SetupPage-TMDB.png)
+
 ### Guest Page (`/guest`)
 - Select your name from dropdown
 - Upload a profile photo
 - Make predictions for each award category
 - Progress bar shows completion percentage
 - Submit button saves predictions
+
+![Guest Predictions Page](Screenshots/PredictionsPage.png)
 
 ### Admin Page (`/admin`)
 - **Display controls:** Show Logo, Show Scoreboard, Show Award
@@ -158,15 +172,24 @@ Messages are sent in format: `action+++param1+++param2`
 - **Room management:** Create/delete rooms
 - **Guest table:** View all guests with scores and predictions for all categories
 
+![Admin Control Panel](Screenshots/AdminPage.png)
+
 ### Display Page (`/display`)
-- **Logo Screen:** Title with random category preview cycling every 40 seconds
+- **Logo Screen:** Title with random category preview cycling every 40 seconds.
 - **Award Screen:** Nominees appear with 2-second stagger, predictor avatars show who picked each nominee
 - **Scoreboard Screen:** Scores animate from previous values, guest cards smoothly reorder, detailed prediction table slides up after 5 seconds
+- **QR Code overlay:** Shown in the top-right corner when predictions are open, hidden once locked
 - **Responsive:** All screens adapt to different resolutions using viewport-based sizing
 - **Customizable backgrounds:** Place images in `server/data/backgrounds/`:
   - `bg-logo.png` - Logo screen background
   - `bg-award.png` - Award screen background
   - `bg-scoreboard.png` - Scoreboard background
+
+![Logo Screen (Displays Random Categories)](Screenshots/LogoPage-DisplayingRandomCategory.png)
+
+![Award Screen](Screenshots/AwardPage.png)
+
+![Scoreboard Screen](Screenshots/ScoreboardPage.png)
 
 ## Animations
 
