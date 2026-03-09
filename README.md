@@ -72,9 +72,9 @@ AwardsShowSuite/
 
    Without a TMDB key the app works normally -- you just won't be able to use the TMDB search feature in the Setup page. You can still upload images manually or browse the image gallery.
 
-5. **Set up images (not included in repo):**
+5. **Set up images:**
 
-   Create the following directories and add your own images:
+   Placeholder images are included in the repo. Replace them with your own:
    ```
    server/data/nominees/      # Nominee photos (referenced in awards.json)
    server/data/backgrounds/   # Background images:
@@ -82,6 +82,7 @@ AwardsShowSuite/
                               #   - bg-award.png
                               #   - bg-scoreboard.png
                               #   - trophy.png (default guest avatar)
+                              #   - qrcode.png (shown on display when predictions are open)
    ```
 
 6. **Update awards data:**

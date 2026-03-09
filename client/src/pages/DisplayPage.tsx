@@ -109,6 +109,31 @@ export default function DisplayPage() {
         position: 'relative'
       }}
     >
+      {!appState?.predictions_locked && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 16,
+            right: 16,
+            zIndex: 100,
+            bgcolor: 'rgba(0, 0, 0, 0.55)',
+            borderRadius: 1,
+            p: '6px',
+          }}
+        >
+          <Box
+            component="img"
+            src="/data/backgrounds/qrcode.png"
+            alt="QR Code"
+            sx={{
+              display: 'block',
+              width: '8vw',
+              height: '8vw',
+              opacity: 0.9,
+            }}
+          />
+        </Box>
+      )}
       <AnimatePresence mode="wait">
         {screenMode === 'logo' && (
           <LogoScreen key="logo" awards={awards} eventTitle={appState?.event_title} />

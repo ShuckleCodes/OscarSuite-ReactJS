@@ -213,7 +213,7 @@ export default function ScoreboardScreen({
       }}
     >
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+      <Box sx={{ mb: 4 }}>
         <motion.div
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -234,11 +234,11 @@ export default function ScoreboardScreen({
         {/* Room Selector */}
         {rooms.length > 0 && (
           <motion.div
-            initial={{ x: 50, opacity: 0 }}
+            initial={{ x: -50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
           >
-            <FormControl size="small" sx={{ minWidth: 150 }}>
+            <FormControl size="small" sx={{ minWidth: 150, mt: 1 }}>
               <Select
                 value={currentRoom}
                 onChange={(e) => onRoomChange(e.target.value as string)}
@@ -360,20 +360,20 @@ export default function ScoreboardScreen({
           maxHeight: '45%',
           backgroundColor: 'rgba(20, 20, 20, 0.95)',
           borderTop: '2px solid #C9A227',
-          overflow: 'auto'
+          overflow: 'hidden'
         }}
       >
-        <TableContainer>
-          <Table size="small" stickyHeader>
+        <TableContainer sx={{ overflow: 'hidden' }}>
+          <Table size="small" stickyHeader sx={{ tableLayout: 'fixed', width: '100%' }}>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ bgcolor: '#1a1a1a', color: 'primary.main', fontWeight: 700 }}>
+                <TableCell sx={{ bgcolor: '#1a1a1a', color: 'primary.main', fontWeight: 700, width: '9%', fontSize: 'clamp(0.5rem, 0.7vw, 0.85rem)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   Guest
                 </TableCell>
                 {awards.map(award => (
                   <TableCell
                     key={award.id}
-                    sx={{ bgcolor: '#1a1a1a', color: 'primary.main', fontWeight: 600, fontSize: '0.75rem' }}
+                    sx={{ bgcolor: '#1a1a1a', color: 'primary.main', fontWeight: 600, fontSize: 'clamp(0.45rem, 0.65vw, 0.8rem)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', padding: '4px 4px' }}
                   >
                     {shortenAwardName(award.name)}
                   </TableCell>
@@ -383,7 +383,7 @@ export default function ScoreboardScreen({
             <TableBody>
               {[...guests].sort((a, b) => a.name.localeCompare(b.name)).map(guest => (
                 <TableRow key={guest.id} hover>
-                  <TableCell sx={{ color: 'white', fontWeight: 500 }}>
+                  <TableCell sx={{ color: 'white', fontWeight: 500, fontSize: 'clamp(0.5rem, 0.7vw, 0.85rem)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {guest.name}
                   </TableCell>
                   {awards.map(award => {
@@ -410,8 +410,11 @@ export default function ScoreboardScreen({
                         sx={{
                           bgcolor: bgColor,
                           color: textColor,
-                          fontSize: '0.7rem',
-                          padding: '4px 8px'
+                          fontSize: 'clamp(0.45rem, 0.65vw, 0.8rem)',
+                          padding: '4px 4px',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
                         }}
                       >
                         {nomineeName}
