@@ -5,10 +5,10 @@ import type { Award, GuestWithScore } from '../../types';
 interface AwardScreenProps {
   award: Award;
   guests: GuestWithScore[];
-  winnerId: number | null;
+  winnerIds: number[];
 }
 
-export default function AwardScreen({ award, guests, winnerId }: AwardScreenProps) {
+export default function AwardScreen({ award, guests, winnerIds }: AwardScreenProps) {
   const getImageUrl = (image: string) => `/data/nominees/${image}`;
   const getGuestPhotoUrl = (photo: string) => {
     if (!photo) return '/data/backgrounds/trophy.png';
@@ -86,7 +86,7 @@ export default function AwardScreen({ award, guests, winnerId }: AwardScreenProp
         }}
       >
         {award.nominees.map((nominee, index) => {
-          const isWinner = winnerId === nominee.id;
+          const isWinner = winnerIds.includes(nominee.id);
           const predictors = getPredictors(nominee.id);
 
           return (

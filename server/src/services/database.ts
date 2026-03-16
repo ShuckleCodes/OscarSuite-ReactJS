@@ -28,7 +28,7 @@ interface RoomsDB {
 interface AppStateDB {
   predictions_locked: boolean;
   current_award_id: number | null;
-  winners: Record<string, number>;
+  winners: Record<string, number[]>;
   event_title: string;
 }
 
@@ -91,6 +91,18 @@ async function getAppStateDb(): Promise<Low<AppStateDB>> {
     // Migrate existing db: add event_title if missing
     if (appStateDb.data.event_title === undefined) {
       appStateDb.data.event_title = 'Awards Night';
+      await appStateDb.write();
+    }
+    // Migrate existing db: convert single-number winners to arrays
+    let winnersMigrated = false;
+    for (const key of Object.keys(appStateDb.data.winners)) {
+      const val = appStateDb.data.winners[key];
+      if (typeof val === 'number') {
+        (appStateDb.data.winners as Record<string, number | number[]>)[key] = [val];
+        winnersMigrated = true;
+      }
+    }
+    if (winnersMigrated) {
       await appStateDb.write();
     }
   }
@@ -253,10 +265,14 @@ export async function deleteNominee(awardId: number, nomineeId: number): Promise
   award.nominees.splice(index, 1);
   await db.write();
 
-  // Clear winner if this nominee was the winner
+  // Remove this nominee from winners if present
   const appState = await getAppState();
-  if (appState.winners[String(awardId)] === nomineeId) {
-    await clearWinner(awardId);
+  if (Array.isArray(appState.winners[String(awardId)]) && appState.winners[String(awardId)].includes(nomineeId)) {
+    const stateDb = await getAppStateDb();
+    await stateDb.read();
+    const winners = stateDb.data!.winners[String(awardId)];
+    stateDb.data!.winners[String(awardId)] = winners.filter(id => id !== nomineeId);
+    await stateDb.write();
   }
 
   return true;
@@ -393,7 +409,7 @@ export async function getGuestsWithScores(roomCode?: string): Promise<GuestWithS
     let score = 0;
 
     for (const [awardId, nomineeId] of Object.entries(guest.predictions)) {
-      if (winners[awardId] !== undefined && winners[awardId] === nomineeId) {
+      if (Array.isArray(winners[awardId]) && winners[awardId].includes(nomineeId)) {
         score += 1;
       }
     }
@@ -441,7 +457,14 @@ export async function setWinner(awardId: number, nomineeId: number): Promise<voi
   if (!db.data!.winners) {
     db.data!.winners = {};
   }
-  db.data!.winners[String(awardId)] = nomineeId;
+  const current = db.data!.winners[String(awardId)] ?? [];
+  const idx = current.indexOf(nomineeId);
+  if (idx >= 0) {
+    current.splice(idx, 1);
+  } else {
+    current.push(nomineeId);
+  }
+  db.data!.winners[String(awardId)] = current;
   await db.write();
 }
 

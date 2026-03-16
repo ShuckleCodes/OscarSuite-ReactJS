@@ -20,8 +20,8 @@ export default function DisplayPage() {
 
   const [screenMode, setScreenMode] = useState<ScreenMode>('logo');
   const [currentAwardId, setCurrentAwardId] = useState<number | null>(null);
-  const [winnerId, setWinnerId] = useState<number | null>(null);
-  const [winners, setWinners] = useState<Record<string, number>>({});
+  const [winnerIds, setWinnerIds] = useState<number[]>([]);
+  const [winners, setWinners] = useState<Record<string, number[]>>({});
   const [currentRoom, setCurrentRoom] = useState<string>('');
 
   const currentAward = awards.find((a: Award) => a.id === currentAwardId);
@@ -48,11 +48,11 @@ export default function DisplayPage() {
     if (action === 'showLogo') {
       setScreenMode('logo');
       setCurrentAwardId(null);
-      setWinnerId(null);
+      setWinnerIds([]);
     } else if (action === 'showAward' && parts.length > 1) {
       const awardId = parseInt(parts[1]);
       setCurrentAwardId(awardId);
-      setWinnerId(null);
+      setWinnerIds([]);
       setScreenMode('award');
     } else if (action === 'showScoreboard') {
       setScreenMode('scoreboard');
@@ -60,9 +60,17 @@ export default function DisplayPage() {
     } else if (action === 'selectWinner' && parts.length >= 3) {
       const awardId = parseInt(parts[1]);
       const nomineeId = parseInt(parts[2]);
-      setWinners(prev => ({ ...prev, [awardId]: nomineeId }));
+      setWinners(prev => {
+        const current = prev[awardId] ?? [];
+        const idx = current.indexOf(nomineeId);
+        const updated = idx >= 0 ? current.filter(id => id !== nomineeId) : [...current, nomineeId];
+        return { ...prev, [awardId]: updated };
+      });
       if (currentAwardId === awardId) {
-        setWinnerId(nomineeId);
+        setWinnerIds(prev => {
+          const idx = prev.indexOf(nomineeId);
+          return idx >= 0 ? prev.filter(id => id !== nomineeId) : [...prev, nomineeId];
+        });
       }
       refetchGuests();
     } else if (action === 'clearWinner' && parts.length > 1) {
@@ -73,7 +81,7 @@ export default function DisplayPage() {
         return updated;
       });
       if (currentAwardId === awardId) {
-        setWinnerId(null);
+        setWinnerIds([]);
       }
       refetchGuests();
     } else if (action === 'roomsUpdated') {
@@ -144,7 +152,7 @@ export default function DisplayPage() {
             key={`award-${currentAwardId}`}
             award={currentAward}
             guests={filteredGuests}
-            winnerId={winnerId}
+            winnerIds={winnerIds}
           />
         )}
 

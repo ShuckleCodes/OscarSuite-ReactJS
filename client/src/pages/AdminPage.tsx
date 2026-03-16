@@ -222,10 +222,10 @@ export default function AdminPage() {
     const prediction = guest.predictions[awardId];
     if (!prediction) return 'default';
 
-    const winner = winners[awardId];
-    if (!winner) return 'primary';
+    const awardWinners = winners[awardId];
+    if (!awardWinners || awardWinners.length === 0) return 'primary';
 
-    return prediction === winner ? 'success' : 'error';
+    return awardWinners.includes(prediction) ? 'success' : 'error';
   };
 
   const getRoomName = (code: string) => {
@@ -312,7 +312,7 @@ export default function AdminPage() {
                   {awards.map((award: Award) => (
                     <MenuItem key={award.id} value={award.id}>
                       {award.name}
-                      {winners[award.id] && ' ✓'}
+                      {winners[award.id]?.length > 0 && ' ✓'}
                     </MenuItem>
                   ))}
                 </Select>
@@ -343,7 +343,7 @@ export default function AdminPage() {
               {selectedAward ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   {selectedAward.nominees.map((nominee) => {
-                    const isWinner = winners[selectedAward.id] === nominee.id;
+                    const isWinner = winners[selectedAward.id]?.includes(nominee.id) ?? false;
                     return (
                       <Button
                         key={nominee.id}
@@ -358,14 +358,14 @@ export default function AdminPage() {
                       </Button>
                     );
                   })}
-                  {winners[selectedAward.id] && (
+                  {(winners[selectedAward.id]?.length ?? 0) > 0 && (
                     <Button
                       variant="text"
                       color="error"
                       onClick={() => handleClearWinner(selectedAward.id)}
                       sx={{ mt: 1 }}
                     >
-                      Clear Winner
+                      Clear Winners
                     </Button>
                   )}
                 </Box>

@@ -18,7 +18,7 @@ import type { Award, GuestWithScore, Room } from '../../types';
 interface ScoreboardScreenProps {
   guests: GuestWithScore[];
   awards: Award[];
-  winners: Record<string, number>;
+  winners: Record<string, number[]>;
   rooms: Room[];
   currentRoom: string;
   onRoomChange: (roomCode: string) => void;
@@ -188,9 +188,9 @@ export default function ScoreboardScreen({
 
   const getPredictionStatus = (prediction: number | undefined, awardId: number) => {
     if (!prediction) return 'none';
-    const winner = winners[awardId];
-    if (!winner) return 'pending';
-    return prediction === winner ? 'correct' : 'incorrect';
+    const awardWinners = winners[awardId];
+    if (!awardWinners || awardWinners.length === 0) return 'pending';
+    return awardWinners.includes(prediction) ? 'correct' : 'incorrect';
   };
 
   return (
@@ -213,7 +213,7 @@ export default function ScoreboardScreen({
       }}
     >
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ mb: 4, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
         <motion.div
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -238,7 +238,7 @@ export default function ScoreboardScreen({
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            <FormControl size="small" sx={{ minWidth: 150, mt: 1 }}>
+            <FormControl size="small" sx={{ minWidth: 150, mt: 2 }}>
               <Select
                 value={currentRoom}
                 onChange={(e) => onRoomChange(e.target.value as string)}
