@@ -261,7 +261,7 @@ export default function ScoreboardScreen({
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          flexWrap: 'wrap',
+          flexWrap: 'nowrap',
           gap: '1vw',
           flex: 1,
           position: 'relative',
@@ -272,11 +272,10 @@ export default function ScoreboardScreen({
         <AnimatePresence>
           {sortedGuests.map((guest) => {
             const isLeader = (guest.displayScore || 0) === maxScore && maxScore > 0;
-            // Calculate responsive card width based on number of guests (max 10 per row)
+            // Calculate responsive card width based on total number of guests (all in one row)
             const guestCount = sortedGuests.length;
-            const cardsPerRow = Math.min(guestCount, 10);
-            const cardWidth = `${Math.min(15, 90 / Math.max(cardsPerRow, 3))}vw`;
-            const photoSize = `${Math.min(8, 45 / Math.max(cardsPerRow, 3))}vw`;
+            const cardWidth = `${Math.min(15, 90 / Math.max(guestCount, 3))}vw`;
+            const photoSize = `${Math.min(8, 45 / Math.max(guestCount, 3))}vw`;
 
             return (
               <motion.div
